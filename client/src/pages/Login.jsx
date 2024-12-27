@@ -27,12 +27,12 @@ const SignUp = () => {
     try {
       const response = await axiosInstance.post("/user/login",{ email, password });
       console.log("response from server", response);
-      toast.success(response.data.message)
-      navigate("/home")
+      // navigate("/home")
       dispatch(addUser(response.data.id))
     } catch (error) {
       console.log(error);
-      toast.error(error.response?.data?.message)
+      alert(error.response?.data?.message)
+      // toast.error(error.response?.data?.message)
     }
   };
 
@@ -45,7 +45,7 @@ const SignUp = () => {
             <img className="w-24" src={logo} alt="" />
           </div> */}
 
-          <h2 className="text-xl font-bold mb-4 text-gray-800">Signup</h2>
+          <h2 className="text-xl font-bold mb-4 text-gray-800">Login</h2>
           <form onSubmit={handleSubmit}>
             <div className="space-y-4">
          
@@ -99,12 +99,11 @@ const SignUp = () => {
                   .then(response => {
                     console.log("Google sign-in successful:", response.data);
                     dispatch(addUser(response.data.user._id))
-                    toast.success(response.data.message)
-                    navigate("/home")
+                    // navigate("/home")
                   })
                   .catch(error => {
-                    console.error("Google sign-in error:", error.response);
-                    alert(error.response.data.message)
+                    console.error("Google sign-in error:", error);
+                    // alert(error.response.data.message)
                   });
                 }}
                 onError={() => {
@@ -117,14 +116,10 @@ const SignUp = () => {
           <p className="mt-4 text-center text-sm text-gray-600">
             Don't have an account?{" "}
             <Link to={"/signup"} className="font-medium text-gray-800 hover:text-gray-600">
-              Sign in
+              Sign up
             </Link>
           </p>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            <Link to={"/password-forgot"} className="font-medium text-gray-800 hover:text-gray-600">
-              Forgot Password?
-            </Link>
-          </p>
+         
         </div>
 
       </div>

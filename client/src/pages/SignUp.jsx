@@ -103,7 +103,7 @@ const SignUp = () => {
               type="submit"
               className="w-full mt-6 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
             >
-              Login
+              Sign Up
             </button>
           </form>
 
@@ -136,16 +136,12 @@ const SignUp = () => {
           </div>
 
           <p className="mt-4 text-center text-sm text-gray-600">
-            Don't have an account?{" "}
-            <Link to={"/signup"} className="font-medium text-gray-800 hover:text-gray-600">
+          Already have an account?{" "}
+            <Link to={"/login"} className="font-medium text-gray-800 hover:text-gray-600">
               Sign in
             </Link>
           </p>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            <Link to={"/password-forgot"} className="font-medium text-gray-800 hover:text-gray-600">
-              Forgot Password?
-            </Link>
-          </p>
+      
         </div>
 
       </div>

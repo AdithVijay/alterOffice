@@ -83,7 +83,88 @@ const googleSignIn = async(req,res)=>{
     }
 }
 
+
+const login = async(req,res)=>{
+    try{
+      const {email,password}= req.body
+      const user = await URL.findOne({email})
+  
+      if(!user){
+        res.status(401).json({message: "Invalid email or password"})
+      }
+  
+    
+
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      
+      if(!isPasswordValid){
+        return res.status(400).json({ message: "Invalid email or password" });
+      }
+
+      if(user){
+          if(isPasswordValid){
+            console.log(user)
+          return res.status(200).json({
+              message: "Login successful",
+              id: user._id,
+              name: user.name,
+              email: user.email,
+            })
+          }
+      }else{
+          return res.status(400).json({ message: "Invalid email or password" });
+      }
+  }catch(err){
+      console.log(err);
+  }
+}
+
+const googleLogin = async(req,res)=>{
+
+    try {
+      const { token } = req.body;
+  
+      const client = new OAuth2Client("461750813528-fh0oohkab4fjsq691h0soud0ll0bjqe4.apps.googleusercontent.com");
+  
+      const ticket = await client.verifyIdToken({
+        idToken: token,
+        audience: "461750813528-fh0oohkab4fjsq691h0soud0ll0bjqe4.apps.googleusercontent.com", 
+      });
+  
+      const { email, name } = ticket.getPayload(); 
+  
+  
+      let user = await URL.findOne({ email });
+
+      if (!user) {
+        user = new URL({
+          name: name,
+          email: email,
+        });
+        await user.save();
+      }
+      
+  
+      res.status(200).json({
+        success: true,
+        message: "Google login successful",
+        user: user,
+    });
+  
+    } catch (error) {
+      console.error('Google sign-in error:', error);
+      res.status(500).json({
+        message: 'Google sign-in failed',
+        error: error.message,
+      });
+    }
+  
+  }
+
+
 module.exports = {
     signup,
-    googleSignIn
+    googleSignIn,
+    login,
+    googleLogin
 }
