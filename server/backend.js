@@ -8,12 +8,23 @@ const app = express()
 const dotenv = require('dotenv')
 dotenv.config()
 const {OAuth2Client} = require('google-auth-library')
+const helmet = require("helmet");
 
-const corsOptions = {
-  origin: "http://localhost:5173", 
-  credentials: true,              
-};
-app.use(cors(corsOptions))
+app.use(
+  cors({
+    origin: "http://localhost:5173", // Frontend URL
+    methods: ["GET", "POST"],
+    credentials: true,
+  })
+);
+
+app.use(
+  helmet({
+    crossOriginOpenerPolicy: { policy: "same-origin" }, // Adjust as needed
+    crossOriginEmbedderPolicy: false, // Disable if you're not using SharedArrayBuffer
+  })
+);
+
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }));
 

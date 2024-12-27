@@ -16,7 +16,8 @@ const SignUp = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const data = useSelector((state)=>state.user.users)
-  console.log("data from the redux ",data);
+  console.log(data);
+  
 
   // ======================Login========================
 
@@ -26,9 +27,12 @@ const SignUp = () => {
     try {
       const response = await axiosInstance.post("/user/signup",{name, email, password });
       console.log("response from server", response)
+      console.log("sasfdsfadf",response.data.user._id);
+      
       // navigate("/home")
-      dispatch(addUser(response.data.id))
+      dispatch(addUser(response.data.user._id))
     } catch (error) {
+      alert(error.response.data.message)
       console.log(error)
     }
   };
@@ -104,27 +108,30 @@ const SignUp = () => {
           </form>
 
             <div className="flex items-center justify-center w-full py-2 px-4 mt-4">
-              <GoogleLogin
+            <GoogleLogin
                 onSuccess={credentialResponse => {
-                  var credentialResponseDecoded = jwtDecode(credentialResponse.credential)
-                  
+                  var credentialResponseDecoded = jwtDecode(credentialResponse.credential);
                   const googleToken = credentialResponse.credential;
-                  console.log(credentialResponse)
 
-                  axiosInstance.post("/user/googleLogin", { token: googleToken })
+                  //Post request being sending  to the server 
+
+                  axiosInstance.post("/user/googlesignin", { token: googleToken })
                   .then(response => {
-                    console.log("Google sign-in successful:", response.data);
-                    dispatch(addUser(response.data.user._id))
-                    // navigate("/home")
+                    console.log(response.data);
+                    dispatch(addUser(response.data.user.id))
                   })
+                  
                   .catch(error => {
-                    console.error("Google sign-in error:", error.response);
-                    alert(error.response.data.message)
-                  })
+                    console.log(error);
+                    // toast.error( error.response)
+                    // toast.error(error.response.data.message)
+                  });
+               
                 }}
                 onError={() => {
                   console.log('Login Failed');
                 }}
+
               />
           </div>
 

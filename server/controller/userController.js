@@ -1,6 +1,7 @@
 
 const URL = require('../model/url');
 const bcrypt = require('bcryptjs');
+const { OAuth2Client } = require('google-auth-library');
 
 const securePassword = async (password) => {
     try {
@@ -38,6 +39,51 @@ const signup = async(req,res)=>{
     }
 }
 
+const googleSignIn = async(req,res)=>{
+
+    try{
+      const { token } = req.body;
+      console.log("token",token);
+      
+      const client = new OAuth2Client("461750813528-fh0oohkab4fjsq691h0soud0ll0bjqe4.apps.googleusercontent.com");
+
+      const ticket = await client.verifyIdToken({
+        idToken: token,
+        audience:"461750813528-fh0oohkab4fjsq691h0soud0ll0bjqe4.apps.googleusercontent.com", // Specify the CLIENT_ID of the app that accesses the backend
+      });
+      const payload = ticket.getPayload();
+      console.log(payload);
+      const { sub, email, name } = payload;
+
+      let user = await URL.findOne({ email });
+      if(user){
+        res.status(409).json({ message: "User already exists" });
+    }
+      if (!user) {
+        // If the user doesn't exist, create a new user
+        user = await URL.create({
+          googleId: sub, // Store Google user ID
+          name: name,
+          email: email,
+        });
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: "User signed in successfully with Google",
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+        },
+      })
+
+    }catch(err){
+      console.log("google signin error",err);
+    }
+}
+
 module.exports = {
-    signup
+    signup,
+    googleSignIn
 }
