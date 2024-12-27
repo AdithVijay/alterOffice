@@ -1,5 +1,5 @@
 
-const URL = require('../model/url');
+const User = require('../model/user');
 const bcrypt = require('bcryptjs');
 const { OAuth2Client } = require('google-auth-library');
 
@@ -16,14 +16,14 @@ const signup = async(req,res)=>{
         const {name,email,password} = req.body
         console.log(req.body);
         
-        const isEmailExists = await URL.findOne({email})
+        const isEmailExists = await User.findOne({email})
         if(isEmailExists){
            return res.status(401).json({message: "email already exists"});
         }
          
             const passwordhash =await securePassword(password)
             console.log(passwordhash)
-            const user = await URL.create({
+            const user = await User.create({
                 name:name,
                 password:passwordhash,
                 email:email,
@@ -55,14 +55,13 @@ const googleSignIn = async(req,res)=>{
       console.log(payload);
       const { sub, email, name } = payload;
 
-      let user = await URL.findOne({ email });
+      let user = await User.findOne({ email });
       if(user){
         res.status(409).json({ message: "User already exists" });
     }
       if (!user) {
         // If the user doesn't exist, create a new user
-        user = await URL.create({
-          googleId: sub, // Store Google user ID
+        user = await User.create({
           name: name,
           email: email,
         });
@@ -87,7 +86,7 @@ const googleSignIn = async(req,res)=>{
 const login = async(req,res)=>{
     try{
       const {email,password}= req.body
-      const user = await URL.findOne({email})
+      const user = await User.findOne({email})
   
       if(!user){
         res.status(401).json({message: "Invalid email or password"})
@@ -134,10 +133,10 @@ const googleLogin = async(req,res)=>{
       const { email, name } = ticket.getPayload(); 
   
   
-      let user = await URL.findOne({ email });
+      let user = await User.findOne({ email });
 
       if (!user) {
-        user = new URL({
+        user = new User({
           name: name,
           email: email,
         });
