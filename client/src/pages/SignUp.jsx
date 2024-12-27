@@ -9,28 +9,27 @@ import { addUser } from "@/redux/Userslice";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 // import { toast } from "sonner";
 
-const Login = () => {
+const SignUp = () => {
+  const [name, setname] = useState("");
   const [email, setemail] = useState("");
-  const [password, setpassword] = useState("");
+  const [password, setpassword] = useState("")
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  // const data = useSelector((state)=>state.user.users)
-  // console.log("data from the redux ",data);
+  const data = useSelector((state)=>state.user.users)
+  console.log("data from the redux ",data);
 
   // ======================Login========================
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Submitting:", { email, password }); 
+    console.log("Submitting:", { name,email, password }); 
     try {
-      const response = await axiosInstance.post("/user/login",{ email, password });
-      console.log("response from server", response);
-      toast.success(response.data.message)
-      navigate("/home")
+      const response = await axiosInstance.post("/user/signup",{name, email, password });
+      console.log("response from server", response)
+      // navigate("/home")
       dispatch(addUser(response.data.id))
     } catch (error) {
-      console.log(error);
-      toast.error(error.response?.data?.message)
+      console.log(error)
     }
   };
 
@@ -43,9 +42,25 @@ const Login = () => {
             <img className="w-24" src={logo} alt="" />
           </div> */}
 
-          <h2 className="text-xl font-bold mb-4 text-gray-800">Login</h2>
+          <h2 className="text-xl font-bold mb-4 text-gray-800">Signup</h2>
           <form onSubmit={handleSubmit}>
             <div className="space-y-4">
+
+            <div>
+                <label
+                  htmlFor="text"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Name
+                </label>
+                <input
+                  id="name"
+                  type="name"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white"
+                  required
+                  onChange={(e) => setname(e.target.value)}
+                />
+              </div>
          
               <div>
                 <label
@@ -131,4 +146,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default SignUp;
