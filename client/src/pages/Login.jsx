@@ -89,7 +89,7 @@ const Login = () => {
           </form>
 
             <div className="flex items-center justify-center w-full py-2 px-4 mt-4">
-              <GoogleLogin
+              {/* <GoogleLogin
                 onSuccess={credentialResponse => {
                   var credentialResponseDecoded = jwtDecode(credentialResponse.credential)
                   
@@ -110,7 +110,7 @@ const Login = () => {
                 onError={() => {
                   console.log('Login Failed');
                 }}
-              />
+              /> */}
           </div>
 
           <p className="mt-4 text-center text-sm text-gray-600">
