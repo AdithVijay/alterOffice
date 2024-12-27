@@ -27,7 +27,7 @@ const SignUp = () => {
     try {
       const response = await axiosInstance.post("/user/login",{ email, password });
       console.log("response from server", response);
-      // navigate("/home")
+      navigate("/dashboard")
       dispatch(addUser(response.data.id))
     } catch (error) {
       console.log(error);
@@ -99,7 +99,7 @@ const SignUp = () => {
                   .then(response => {
                     console.log("Google sign-in successful:", response.data);
                     dispatch(addUser(response.data.user._id))
-                    // navigate("/home")
+                    navigate("/dashboard")
                   })
                   .catch(error => {
                     console.error("Google sign-in error:", error);

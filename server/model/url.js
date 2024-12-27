@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 
 const urlSchema = new mongoose.Schema({
+    user:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    },
     longUrl: {
         type: String,
         required: true
@@ -8,11 +12,6 @@ const urlSchema = new mongoose.Schema({
     shortUrl: {
         type: String,
         required: true
-    },
-    topic: {
-        type: String,
-        enum: ['acquisition', 'activation', 'retention'], // Optional, for grouping URLs
-        default: 'acquisition'
     },
     createdAt: {
         type: Date,

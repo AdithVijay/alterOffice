@@ -7,7 +7,6 @@ const userRoute = require('./routes/userRoute');
 const app = express()
 const dotenv = require('dotenv')
 dotenv.config()
-const {OAuth2Client} = require('google-auth-library')
 const helmet = require("helmet");
 
 app.use(

@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link2, Menu } from 'lucide-react';
 import { Button } from '../components/ui/button'  // Ensure you have a Button component
 import { Input } from '../components/ui/input';    // Ensure you have an Input component
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';  // Ensure your Table component exists
 import { Sheet, SheetContent, SheetTrigger } from '../components/ui/sheet';  // Ensure your Sheet component exists
+import axiosInstance from '@/config/axiosInstance';
+import { useSelector } from 'react-redux';
 
 const Dashboard = () => {
   const [url, setUrl] = useState('');
@@ -23,19 +25,40 @@ const Dashboard = () => {
       createdAt: '2024-01-02',
     },
   ]);
+  const user =  useSelector((state)=>state.user.users)
+  console.log("adsaasdasd",user)
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const newUrl = {
-      id: (urls.length + 1).toString(),
-      originalUrl: url,
-      shortUrl: `https://short.url/${Math.random().toString(36).substring(7)}`,
-      clicks: 0,
-      createdAt: new Date().toISOString().split('T')[0],
-    };
-    setUrls([...urls, newUrl]);
-    setUrl('');
+  useEffect(() => {
+    getUrlData()
+  }, [])
+  
+
+  const getUrlData = async()=>{
+    try {
+      const response = await axiosInstance.get(`/user/getUrlData/${user}`)
+      console.log(response)
+      console.log("aa",response.data);
+      
+      setUrls(response.data)
+    } catch (error) {
+        console.log(error)
+    }
+  }
+
+
+  async function handleSubmit(e){
+    e.preventDefault()
+    try {
+      const response =await axiosInstance.post("/user/shorten",{url,user})
+      console.log(response)
+      setUrl('')
+      await getUrlData()
+
+    } catch (error) {
+      console.log(error)
+    }
   };
+
 
   return (
     <div className="min-h-screen bg-background">
@@ -96,15 +119,19 @@ const Dashboard = () => {
             </TableHeader>
             <TableBody>
               {urls.map((url) => (
-                <TableRow key={url.id}>
-                  <TableCell className="font-medium truncate max-w-[200px]">
-                    {url.originalUrl}
+                <TableRow key={url._id}>
+                 <TableCell className="font-medium truncate max-w-[200px]">
+                    <a href={url.longUrl} target="_blank" rel="noopener noreferrer">
+                      {url.longUrl}
+                    </a>
                   </TableCell>
                   <TableCell>
-                    {url.shortUrl} 
+                          <a href={`http://localhost:3000/user/${url.shortUrl}`} target="_blank" rel="noopener noreferrer">
+                            {`http://localhost:3000/user/${url.shortUrl}`}
+                          </a>
                   </TableCell>
                   <TableCell className="text-right">{url.clicks}</TableCell>
-                  <TableCell className="text-right">{url.createdAt}</TableCell>
+                  <TableCell className="text-right">{new Date(url.createdAt).toLocaleString()}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
