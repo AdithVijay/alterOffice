@@ -69,6 +69,8 @@ const handleGenerateNewUrl = async (req, res) => {
   }
 };
 
+
+
 const handleRedirect = async (req, res) => {
   try {
     const { shortUrl } = req.params;
@@ -79,25 +81,31 @@ const handleRedirect = async (req, res) => {
     }
 
     // Track click for analytics
-    const currentDate = new Date().toISOString().split('T')[0]; // Get current date (YYYY-MM-DD)
-    
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
+
     // Get the user's IP address
     const userIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
     // Update total clicks
     url.clicks += 1;
 
-    // Check if the user (by IP) has already clicked today
-    const uniqueUserEntry = url.uniqueUserClicks.find(entry => entry.date === currentDate && entry.ip === userIP);
+    // Check if the user has clicked this URL today
+    const uniqueUserEntry = url.uniqueUserClicks?.find(
+      entry => entry.ip === userIP && new Date(entry.date).getTime() === currentDate.getTime()
+    );
+
     if (!uniqueUserEntry) {
-      // If no entry for today and this IP, increment unique users count
+      // Increment unique users only if this is their first click today
       url.uniqueUsers += 1;
-      // Store this IP in the uniqueUserClicks array
       url.uniqueUserClicks.push({ date: currentDate, ip: userIP });
     }
 
     // Update clicksByDate
-    const clickByDate = url.clicksByDate.find(entry => entry.date === currentDate);
+    const clickByDate = url.clicksByDate.find(
+      entry => new Date(entry.date).getTime() === currentDate.getTime()
+    );
+
     if (clickByDate) {
       clickByDate.clickCount += 1;
     } else {
@@ -105,38 +113,62 @@ const handleRedirect = async (req, res) => {
     }
 
     // Update OS and Device Analytics
-    const userAgent = req.headers['user-agent']; // Example of how you might extract the user agent
-    const osName = extractOS(userAgent); // Function to extract OS name from user agent string
-    const deviceName = extractDevice(userAgent); // Function to extract device name from user agent string
+    const userAgent = req.headers['user-agent'];
+    const osName = extractOS(userAgent);
+    const deviceName = extractDevice(userAgent);
 
     // Update OS type analytics
     const osTypeEntry = url.osType.find(entry => entry.osName === osName);
     if (osTypeEntry) {
-      osTypeEntry.uniqueClicks += 1;
-      osTypeEntry.uniqueUsers += 1; // You may need to check for unique users
+      // Check if the user is unique for this OS today
+      const osUserEntry = osTypeEntry.uniqueUserIPs?.find(
+        entry => entry.ip === userIP && new Date(entry.date).getTime() === currentDate.getTime()
+      );
+
+      if (!osUserEntry) {
+        osTypeEntry.uniqueClicks += 1;
+        osTypeEntry.uniqueUsers += 1;
+        osTypeEntry.uniqueUserIPs.push({ ip: userIP, date: currentDate });
+      }
     } else {
-      url.osType.push({ osName, uniqueClicks: 1, uniqueUsers: 1 });
+      url.osType.push({
+        osName,
+        uniqueClicks: 1,
+        uniqueUsers: 1,
+        uniqueUserIPs: [{ ip: userIP, date: currentDate }],
+      });
     }
 
     // Update Device type analytics
     const deviceTypeEntry = url.deviceType.find(entry => entry.deviceName === deviceName);
     if (deviceTypeEntry) {
-      deviceTypeEntry.uniqueClicks += 1;
-      deviceTypeEntry.uniqueUsers += 1; // Same as above for unique users
+      // Check if the user is unique for this device today
+      const deviceUserEntry = deviceTypeEntry.uniqueUserIPs?.find(
+        entry => entry.ip === userIP && new Date(entry.date).getTime() === currentDate.getTime()
+      );
+
+      if (!deviceUserEntry) {
+        deviceTypeEntry.uniqueClicks += 1;
+        deviceTypeEntry.uniqueUsers += 1;
+      }
     } else {
-      url.deviceType.push({ deviceName, uniqueClicks: 1, uniqueUsers: 1 });
+      url.deviceType.push({
+        deviceName,
+        uniqueClicks: 1,
+        uniqueUsers: 1,
+        uniqueUserIPs: [{ ip: userIP, date: currentDate }],
+      });
     }
 
-    // Save the updated URL data
     await url.save();
 
-    // Redirect the user to the long URL
     res.redirect(url.longUrl);
   } catch (error) {
     console.error("Error handling redirect:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
+
 
 
 module.exports = {
