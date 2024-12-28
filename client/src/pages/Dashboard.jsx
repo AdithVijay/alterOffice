@@ -113,7 +113,8 @@ const Dashboard = () => {
               <TableRow>
                 <TableHead>Original URL</TableHead>
                 <TableHead>Short URL</TableHead>
-                <TableHead className="text-right">Clicks</TableHead>
+                <TableHead className=" text-left">More Info</TableHead>
+                <TableHead className=" text-right">Clicks</TableHead>
                 <TableHead className="text-right">Created</TableHead>
               </TableRow>
             </TableHeader>
@@ -129,6 +130,9 @@ const Dashboard = () => {
                           <a href={`http://localhost:3000/user/${url.shortUrl}`} target="_blank" rel="noopener noreferrer">
                             {`http://localhost:3000/user/${url.shortUrl}`}
                           </a>
+                  </TableCell>
+                  <TableCell className=" ">
+                    <Button></Button>
                   </TableCell>
                   <TableCell className="text-right">{url.clicks}</TableCell>
                   <TableCell className="text-right">{new Date(url.createdAt).toLocaleString()}</TableCell>
