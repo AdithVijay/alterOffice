@@ -14,6 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import axiosInstance from "@/config/axiosInstance"
 
 // Dummy data matching the MongoDB schema structure
 const analyticsData = {
@@ -44,9 +45,19 @@ const analyticsData = {
   ],
 }
 
-export default function Analytics({ isOpen, onClose }) {
+export default function Analytics({ isOpen, onClose ,urlId}) {
   const [activeTab, setActiveTab] = useState("overview")
 
+
+    async function getUrlAnalytics(){
+        try {
+            const response = await axiosInstance.get(`user/analytics/${urlId}`)
+            console.log(response)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+    
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">

@@ -6,25 +6,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { Sheet, SheetContent, SheetTrigger } from '../components/ui/sheet';  // Ensure your Sheet component exists
 import axiosInstance from '@/config/axiosInstance';
 import { useSelector } from 'react-redux';
+import Modal from './Modal';
 
 const Dashboard = () => {
   const [url, setUrl] = useState('');
-  const [urls, setUrls] = useState([
-    {
-      id: '1',
-      originalUrl: 'https://example.com/very/long/url/that/needs/shortening',
-      shortUrl: 'https://short.url/abc123',
-      clicks: 42,
-      createdAt: '2024-01-01',
-    },
-    {
-      id: '2',
-      originalUrl: 'https://another-example.com/with/long/path',
-      shortUrl: 'https://short.url/xyz789',
-      clicks: 17,
-      createdAt: '2024-01-02',
-    },
-  ]);
+  const [urls, setUrls] = useState([]);
   const user =  useSelector((state)=>state.user.users)
   console.log("adsaasdasd",user)
 
@@ -132,7 +118,7 @@ const Dashboard = () => {
                           </a>
                   </TableCell>
                   <TableCell className=" ">
-                    <Button></Button>
+                    <Modal urlId = {url._id}/>
                   </TableCell>
                   <TableCell className="text-right">{url.clicks}</TableCell>
                   <TableCell className="text-right">{new Date(url.createdAt).toLocaleString()}</TableCell>
