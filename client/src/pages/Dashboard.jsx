@@ -23,8 +23,7 @@ const Dashboard = () => {
     try {
       const response = await axiosInstance.get(`/user/getUrlData/${user}`)
       console.log(response)
-      console.log("aa",response.data);
-      
+      console.log("aa",response.data)
       setUrls(response.data)
     } catch (error) {
         console.log(error)

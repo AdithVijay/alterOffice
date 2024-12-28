@@ -14,6 +14,6 @@ userRoute.post("/shorten",urlController.handleGenerateNewUrl)
 userRoute.get("/getUrlData/:id",urlController.getUrlData)
 userRoute.get("/:shortUrl",urlController.handleRedirect)
 
-userRoute.get("/analytics/:id")
+userRoute.get("/analytics/:id",urlAnalyticsController.fetchUrlAnalytics)
 
 module.exports = userRoute

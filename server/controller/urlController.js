@@ -29,10 +29,8 @@ const getUrlData = async(req, res) => {
   try {
     const { id } = req.params;
     const user = await User.findById(id);
-    console.log(user);
-    console.log(user._id);
+
     const url = await URL.find({ user: user._id });
-    console.log(url);
     return res.status(200).json(url);
   } catch (error) {
     console.log(error);
@@ -48,7 +46,7 @@ const handleGenerateNewUrl = async (req, res) => {
     }
 
     const urlExists = await URL.findOne({ longUrl: url });
-    console.log(urlExists);
+
 
     if (urlExists) {
       return res.status(409).json({ message: "URL already exists" });

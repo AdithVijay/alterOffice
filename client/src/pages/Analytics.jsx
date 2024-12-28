@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -45,19 +45,30 @@ const analyticsData = {
   ],
 }
 
-export default function Analytics({ isOpen, onClose ,urlId}) {
+export default function Analytics({isOpen, onClose ,urlId}) {
   const [activeTab, setActiveTab] = useState("overview")
+  const [data, setdata] = useState();
+  
+console.log("url id",urlId);
+
+  
+useEffect(() => {
+    getUrlAnalytics()
+  }, [urlId])
 
 
     async function getUrlAnalytics(){
         try {
             const response = await axiosInstance.get(`user/analytics/${urlId}`)
             console.log(response)
+            setdata(response.data)
         } catch (error) {
             console.log(error)
         }
     }
-    
+console.log("analytics data",data)
+
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
@@ -80,7 +91,7 @@ export default function Analytics({ isOpen, onClose ,urlId}) {
                       <CardTitle className="text-sm font-medium">Total Clicks</CardTitle>
                     </CardHeader>
                     <CardContent className="pt-2 pb-3">
-                      <div className="text-2xl font-bold">{analyticsData.clicks}</div>
+                      <div className="text-2xl font-bold">{data?.clicks}</div>
                     </CardContent>
                   </Card>
                   <Card>
@@ -88,36 +99,31 @@ export default function Analytics({ isOpen, onClose ,urlId}) {
                       <CardTitle className="text-sm font-medium">Unique Users</CardTitle>
                     </CardHeader>
                     <CardContent className="pt-2 pb-3">
-                      <div className="text-2xl font-bold">{analyticsData.uniqueUsers}</div>
+                      <div className="text-2xl font-bold">{data?.uniqueUsers}</div>
                     </CardContent>
                   </Card>
                 </div>
 
                 <Card>
-                  <CardHeader>
+                <CardHeader>
                     <CardTitle>Clicks Over Time</CardTitle>
-                  </CardHeader>
-                  <CardContent>
+                </CardHeader>
+                <CardContent>
                     <ChartContainer
-                      config={{
+                    config={{
                         clicks: {
-                          label: "Clicks",
-                          color: "hsl(var(--chart-1))",
+                        label: "Clicks",
+                        color: "hsl(var(--chart-1))",
                         },
-                      }}
-                      className="h-[200px]"
+                    }}
+                    className="h-[200px]"
                     >
-                      <LineChart data={analyticsData.clicksByDate}>
-                        <Line
-                          type="monotone"
-                          dataKey="clickCount"
-                          stroke="var(--color-clicks)"
-                          strokeWidth={2}
-                        />
+                    <BarChart data={data?.clicksByDate}>
+                        <Bar dataKey="clickCount" fill="var(--color-clicks)" name="Clicks" />
                         <ChartTooltip content={<ChartTooltipContent />} />
-                      </LineChart>
+                    </BarChart>
                     </ChartContainer>
-                  </CardContent>
+                </CardContent>
                 </Card>
               </TabsContent>
 
@@ -140,7 +146,7 @@ export default function Analytics({ isOpen, onClose ,urlId}) {
                       }}
                       className="h-[180px]"
                     >
-                      <BarChart data={analyticsData.osType}>
+                      <BarChart data={data?.osType}>
                         <Bar dataKey="uniqueClicks" fill="var(--color-clicks)" name="Clicks" />
                         <Bar dataKey="uniqueUsers" fill="var(--color-users)" name="Users" />
                         <ChartTooltip content={<ChartTooltipContent />} />
@@ -164,13 +170,13 @@ export default function Analytics({ isOpen, onClose ,urlId}) {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {analyticsData.osType.map((os) => (
+                        {data?.osType.map((os) => (
                           <TableRow key={os.osName}>
                             <TableCell className="font-medium">{os.osName}</TableCell>
                             <TableCell className="text-right">{os.uniqueClicks}</TableCell>
                             <TableCell className="text-right">{os.uniqueUsers}</TableCell>
                             <TableCell className="text-right">
-                              {((os.uniqueClicks / analyticsData.clicks) * 100).toFixed(1)}%
+                              {((os.uniqueClicks / data.clicks) * 100).toFixed(1)}%
                             </TableCell>
                           </TableRow>
                         ))}
@@ -199,7 +205,7 @@ export default function Analytics({ isOpen, onClose ,urlId}) {
                       }}
                       className="h-[180px]"
                     >
-                      <BarChart data={analyticsData.deviceType}>
+                      <BarChart data={data?.deviceType}>
                         <Bar dataKey="uniqueClicks" fill="var(--color-clicks)" name="Clicks" />
                         <Bar dataKey="uniqueUsers" fill="var(--color-users)" name="Users" />
                         <ChartTooltip content={<ChartTooltipContent />} />
@@ -223,7 +229,7 @@ export default function Analytics({ isOpen, onClose ,urlId}) {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {analyticsData.deviceType.map((device) => (
+                        {data?.deviceType.map((device) => (
                           <TableRow key={device.deviceName}>
                             <TableCell className="font-medium">{device.deviceName}</TableCell>
                             <TableCell className="text-right">{device.uniqueClicks}</TableCell>

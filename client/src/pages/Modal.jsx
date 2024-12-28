@@ -13,7 +13,7 @@ export default function Modal({urlId}) {
         View Analytics
       </Button>
       <Analytics 
-      urlId = {urlId}
+      urlId={urlId}
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
       />
