@@ -1,134 +1,153 @@
-import React, { useEffect, useState } from 'react';
-import { Link2, Menu } from 'lucide-react';
-import { Button } from '../components/ui/button'  // Ensure you have a Button component
-import { Input } from '../components/ui/input';    // Ensure you have an Input component
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';  // Ensure your Table component exists
-import { Sheet, SheetContent, SheetTrigger } from '../components/ui/sheet';  // Ensure your Sheet component exists
-import axiosInstance from '@/config/axiosInstance';
-import { useSelector } from 'react-redux';
-import Modal from './Modal';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import axiosInstance from "@/config/axiosInstance";
+import { IoMdArrowBack } from "react-icons/io"
+import { Link } from "react-router-dom";
 
-const Dashboard = () => {
-  const [url, setUrl] = useState('');
+export default function Dashboard() {
+  const user = useSelector((state) => state.user.users);
   const [urls, setUrls] = useState([]);
-  const user =  useSelector((state)=>state.user.users)
-  console.log("adsaasdasd",user)
 
   useEffect(() => {
-    getUrlData()
-  }, [])
-  
+    getUrlData();
+  }, []);
 
-  const getUrlData = async()=>{
+  const getUrlData = async () => {
     try {
-      const response = await axiosInstance.get(`/user/getUrlData/${user}`)
-      console.log(response)
-      console.log("aa",response.data)
-      setUrls(response.data)
+      const response = await axiosInstance.get(`/user/getUrlData/${user}`);
+      setUrls(response.data);
     } catch (error) {
-        console.log(error)
-    }
-  }
-
-
-  async function handleSubmit(e){
-    e.preventDefault()
-    try {
-      const response =await axiosInstance.post("/user/shorten",{url,user})
-      console.log(response)
-      setUrl('')
-      await getUrlData()
-
-    } catch (error) {
-      console.log(error)
+      console.error("Error fetching URL data:", error);
     }
   };
 
+  // Calculate total statistics
+  const totalUrls = urls.length;
+  const totalClicks = urls.reduce((sum, url) => sum + url.clicks, 0);
+  const uniqueUsers = urls.reduce((sum, url) => sum + url.uniqueUsers, 0);
+
+  // Aggregate clicks by date
+  const clicksByDate = urls
+    .flatMap((url) => url.clicksByDate)
+    .reduce((acc, { date, clickCount }) => {
+      const existingDate = acc.find((item) => item.date === date);
+      if (existingDate) {
+        existingDate.clickCount += clickCount;
+      } else {
+        acc.push({ date, clickCount });
+      }
+      return acc;
+    }, [])
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+  // Aggregate OS type data
+  const osType = urls
+    .flatMap((url) => url.osType)
+    .reduce((acc, { osName, uniqueClicks, uniqueUsers }) => {
+      const existingOS = acc.find((item) => item.osName === osName);
+      if (existingOS) {
+        existingOS.uniqueClicks += uniqueClicks;
+        existingOS.uniqueUsers += uniqueUsers;
+      } else {
+        acc.push({ osName, uniqueClicks, uniqueUsers });
+      }
+      return acc;
+    }, []);
+
+  // Aggregate device type data
+  const deviceType = urls
+    .flatMap((url) => url.deviceType)
+    .reduce((acc, { deviceName, uniqueClicks, uniqueUsers }) => {
+      const existingDevice = acc.find((item) => item.deviceName === deviceName);
+      if (existingDevice) {
+        existingDevice.uniqueClicks += uniqueClicks;
+        existingDevice.uniqueUsers += uniqueUsers;
+      } else {
+        acc.push({ deviceName, uniqueClicks, uniqueUsers });
+      }
+      return acc;
+    }, []);
 
   return (
-    <div className="min-h-screen bg-background">
-      <nav className="border-b">
-        <div className="flex h-16 items-center px-4 container mx-auto">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden">
-                <Menu className="h-6 w-6" />
-                <span className="sr-only">Toggle navigation menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left">
-              <div className="grid gap-4">
-                <Link2 className="h-6 w-6" />
-                <Button variant="ghost" className="justify-start">
-                  Dashboard
-                </Button>
-                <Button variant="ghost" className="justify-start">
-                  Settings
-                </Button>
+    <div>
+        <Link to={"/profile"} className=" flex text-center align-middle items-center">
+            <IoMdArrowBack className=" text-4xl ml-5 pt-2" />
+            <div className=" pt-2">go back</div>
+        </Link>
+        <div className="space-y-4 p-5">
+          <Card>
+            <CardHeader>
+              <CardTitle>URL Analytics Overview</CardTitle>
+              <CardDescription>Summary of your short URL performance</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div>
+                  <p className="text-2xl font-bold">{totalUrls}</p>
+                  <p className="text-sm text-muted-foreground">Total URLs</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{totalClicks}</p>
+                  <p className="text-sm text-muted-foreground">Total Clicks</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{uniqueUsers}</p>
+                  <p className="text-sm text-muted-foreground">Unique Users</p>
+                </div>
               </div>
-            </SheetContent>
-          </Sheet>
-          <div className="flex items-center gap-2 md:gap-4">
-            <Link2 className="h-6 w-6" />
-            <h1 className="text-xl font-bold">URL Shortener</h1>
-          </div>
-          <div className="hidden md:flex items-center ml-auto gap-4">
-            <Button variant="ghost">Dashboard</Button>
-            <Button variant="ghost">Settings</Button>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Clicks Over Time</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="90%" height={300}>
+              <BarChart data={clicksByDate}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="date" />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="clickCount" fill="hsl(221, 70%, 46%)" /> {/* Default blue color */}
+                    </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+          <div className="grid grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Operating Systems</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-6">
+                  {osType.map((os, index) => (
+                    <li key={index} className="flex justify-between">
+                      <span>{os.osName}</span>
+                      <span>{os.uniqueClicks} clicks ({os.uniqueUsers} users)</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Device Types</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-5">
+                  {deviceType.map((device, index) => (
+                    <li key={index} className="flex justify-between">
+                      <span>{device.deviceName}</span>
+                      <span>{device.uniqueClicks} clicks ({device.uniqueUsers} users)</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
           </div>
         </div>
-      </nav>
-
-      <main className="container mx-auto py-6 px-4">
-        <form onSubmit={handleSubmit} className="flex gap-4 mb-8">
-          <Input
-            type="url"
-            placeholder="Enter your URL here"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            required
-            className="flex-1"
-          />
-          <Button type="submit">Shorten URL</Button>
-        </form>
-
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Original URL</TableHead>
-                <TableHead>Short URL</TableHead>
-                <TableHead className=" text-left">More Info</TableHead>
-                <TableHead className=" text-right">Clicks</TableHead>
-                <TableHead className="text-right">Created</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {urls.map((url) => (
-                <TableRow key={url._id}>
-                 <TableCell className="font-medium truncate max-w-[200px]">
-                    <a href={url.longUrl} target="_blank" rel="noopener noreferrer">
-                      {url.longUrl}
-                    </a>
-                  </TableCell>
-                  <TableCell>
-                          <a href={`http://localhost:3000/user/${url.shortUrl}`} target="_blank" rel="noopener noreferrer">
-                            {`http://localhost:3000/user/${url.shortUrl}`}
-                          </a>
-                  </TableCell>
-                  <TableCell className=" ">
-                    <Modal urlId = {url._id}/>
-                  </TableCell>
-                  <TableCell className="text-right">{url.clicks}</TableCell>
-                  <TableCell className="text-right">{new Date(url.createdAt).toLocaleString()}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      </main>
     </div>
   );
-};
-
-export default Dashboard;
+}
