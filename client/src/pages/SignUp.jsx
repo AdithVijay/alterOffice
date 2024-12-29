@@ -29,7 +29,7 @@ const SignUp = () => {
       console.log("response from server", response)
       console.log("sasfdsfadf",response.data.user._id);
       
-      navigate("/dashboard")
+      navigate("/profile")
       dispatch(addUser(response.data.user._id))
     } catch (error) {
       alert(error.response.data.message)
@@ -119,7 +119,7 @@ const SignUp = () => {
                   .then(response => {
                     console.log(response.data);
                     dispatch(addUser(response.data.user.id))
-                    navigate("/dashboard")
+                    navigate("/profile")
                   })
                   
                   .catch(error => {

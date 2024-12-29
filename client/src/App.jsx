@@ -6,17 +6,34 @@ import { BrowserRouter,Router,Routes,Route } from 'react-router-dom'
 import Profile from './pages/Profile'
 import Modal from './pages/modal'
 import Dashboard from './pages/Dashboard'
+import PrivateRoute from './protectedRoutes/PrivateRoute'
 
 const App = () => {
   return (
     <div>
       {/* <Login/> */}
       <Routes>
-        <Route path='/login' element={<Login/>}/>
-        <Route path="/signup" element={<SignUp/>}/>
-        <Route path='/profile' element = {<Profile/>}/>
-        <Route path='/modal' element={<Modal/>}/>
-        <Route path='/dashboard' element={<Dashboard/>}/>
+        <Route path='/login' element={
+          // <PrivateRoute>
+          <Login/>
+          // </PrivateRoute>
+          }/>
+        <Route path="/signup" element={
+          //  <PrivateRoute>
+          <SignUp/>
+          // </PrivateRoute>
+          }/>
+        <Route path='/profile' element = {
+          //  <PrivateRoute>
+          <Profile/>
+          // </PrivateRoute>
+          }/>
+        <Route path='/modal' element={<Modal/> }/>
+        <Route path='/dashboard' element={
+          // <PrivateRoute>
+          <Dashboard/>
+          // </PrivateRoute>
+          }/>
       </Routes>
     </div>
   )

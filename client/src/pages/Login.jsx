@@ -9,7 +9,7 @@ import { addUser } from "@/redux/Userslice";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 // import { toast } from "sonner";
 
-const SignUp = () => {
+const Login = () => {
   const [name, setname] = useState("");
   const [email, setemail] = useState("");
   const [password, setpassword] = useState("")
@@ -27,7 +27,7 @@ const SignUp = () => {
     try {
       const response = await axiosInstance.post("/user/login",{ email, password });
       console.log("response from server", response);
-      navigate("/dashboard")
+      navigate("/profile")
       dispatch(addUser(response.data.id))
     } catch (error) {
       console.log(error);
@@ -99,7 +99,7 @@ const SignUp = () => {
                   .then(response => {
                     console.log("Google sign-in successful:", response.data);
                     dispatch(addUser(response.data.user._id))
-                    navigate("/dashboard")
+                    navigate("/profile")
                   })
                   .catch(error => {
                     console.error("Google sign-in error:", error);
@@ -127,4 +127,4 @@ const SignUp = () => {
   );
 };
 
-export default SignUp;
+export default Login;
