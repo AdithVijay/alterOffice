@@ -11,7 +11,8 @@ import { Link, useNavigate } from 'react-router-dom';
 
 const Profile = () => {
   const [url, setUrl] = useState('');
-  const [urls, setUrls] = useState([]);
+  const [urls, setUrls] = useState([])
+  const [shortUrl,setShortUrl] = useState('')
   const user =  useSelector((state)=>state.user.users)
   console.log("adsaasdasd",user)
 
@@ -46,11 +47,10 @@ const Profile = () => {
       alert(error.response.data.message)
     }
   };
-
-  function toDashBoard(){
-    navigate("/dashboard")
+  function handleCustomAlias(){
+    console.log(shortUrl);
+    
   }
-
 
   return (
     <div className="min-h-screen bg-background">
@@ -85,7 +85,6 @@ const Profile = () => {
           <Link to={"/dashboard"}>
             <Button variant="ghost">Dashboard</Button>
             </Link>
-            <Button variant="ghost">Settings</Button>
           </div>
         </div>
       </nav>
@@ -101,6 +100,17 @@ const Profile = () => {
             className="flex-1"
           />
           <Button type="submit">Shorten URL</Button>
+        </form>
+        <form onSubmit={handleCustomAlias} className="flex gap-2 mb-8">
+          <Input
+              type="text"  // For custom alias
+              placeholder="Enter custom alias"
+              value={shortUrl}
+              onChange={(e) => setShortUrl(e.target.value)}  // Correctly using setShortUrl
+              required
+              className="flex-1 max-w-[250px]"    // Limit the width of the input field.
+          />
+          <Button type="submit">Custom Short URL</Button>
         </form>
 
         <div className="rounded-md border">

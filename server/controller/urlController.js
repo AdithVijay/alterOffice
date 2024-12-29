@@ -52,7 +52,7 @@ const handleGenerateNewUrl = async (req, res) => {
       return res.status(409).json({ message: "URL already exists" });
     }
 
-    const shortId = nanoid(8); 
+    const shortId = nanoid(8) 
 
     await URL.create({
       user: user,
