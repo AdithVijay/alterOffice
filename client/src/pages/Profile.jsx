@@ -41,9 +41,9 @@ const Profile = () => {
       console.log(response)
       setUrl('')
       await getUrlData()
-
     } catch (error) {
       console.log(error)
+      alert(error.response.data.message)
     }
   };
 
