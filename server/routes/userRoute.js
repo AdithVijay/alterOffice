@@ -17,6 +17,6 @@ userRoute.get("/:shortUrl",urlController.handleRedirect)
 
 
 userRoute.get("/analytics/:id",urlAnalyticsController.fetchUrlAnalytics)
-userRoute.get("/useranalytics/:id",urlAnalyticsController.fetchUserAnalytics)
+userRoute.get("/analytics/overall/:id",urlAnalyticsController.fetchUserAnalytics)
 
 module.exports = userRoute

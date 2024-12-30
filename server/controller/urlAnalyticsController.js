@@ -6,11 +6,9 @@ const fetchUrlAnalytics = async (req, res) => {
     const { id } = req.params;
     const trimmedId = id.trim();
 
-    // Check if the ID matches a record in CustomAlias
     const aliasData = await CustomAlias.findById(trimmedId);
 
     if (aliasData) {
-      // If found in CustomAlias, return its analytics
       const refinedData = {
         longUrl: aliasData.longUrl,
         shortUrl: aliasData.alias,
@@ -35,11 +33,9 @@ const fetchUrlAnalytics = async (req, res) => {
       return res.status(200).json(refinedData);
     }
 
-    // Check if the ID matches a record in URL
     const urlData = await URL.findById(trimmedId);
 
     if (urlData) {
-      // If found in URL, return its analytics
       const refinedData = {
         longUrl: urlData.longUrl,
         shortUrl: urlData.shortUrl,
@@ -64,7 +60,6 @@ const fetchUrlAnalytics = async (req, res) => {
       return res.status(200).json(refinedData);
     }
 
-    // If ID does not match any record
     return res.status(404).json({ message: "No URL or Custom Alias found for the provided ID." });
   } catch (error) {
     console.error("Error fetching URL analytics:", error);
@@ -79,24 +74,19 @@ const fetchUserAnalytics = async (req, res) => {
   console.log("User ID in analytics:", id);
 
   try {
-    // Fetch data from both URL and CustomAlias schemas for the given user
     const urls = await URL.find({ user: id });
     const customAliases = await CustomAlias.find({ user: id });
-
-    // Combine the data
     const combinedData = [...urls, ...customAliases];
 
-    // Collect all unique user IPs across both OS and Device analytics
     const uniqueIPs = new Set();
 
     combinedData.forEach((data) => {
-      const seenIPs = new Set(); // Track IPs seen for this specific record
-
+      const seenIPs = new Set()
       data.osType.forEach((os) => {
         os.uniqueUserIPs.forEach((userIP) => {
           if (!seenIPs.has(userIP.ip)) {
-            uniqueIPs.add(userIP.ip);
-            seenIPs.add(userIP.ip);
+            uniqueIPs.add(userIP.ip)
+            seenIPs.add(userIP.ip)
           }
         })
       })
@@ -111,15 +101,13 @@ const fetchUserAnalytics = async (req, res) => {
       });
     });
 
-    // Deduplicated unique users count
     const totalUniqueUsers = uniqueIPs.size;
 
-    // Refine data to send to the frontend
     const refinedData = combinedData.map((data) => ({
       longUrl: data.longUrl,
-      shortUrl: data.shortUrl || data.alias, // Alias serves as shortUrl in CustomAlias
+      shortUrl: data.shortUrl || data.alias, 
       clicks: data.clicks,
-      uniqueUsers: data.uniqueUsers, // This remains per URL or alias
+      uniqueUsers: data.uniqueUsers,
       clicksByDate: data.clicksByDate.map((entry) => ({
         date: entry.date,
         clickCount: entry.clickCount,
@@ -136,7 +124,6 @@ const fetchUserAnalytics = async (req, res) => {
       })),
     }));
 
-    // Send both the refined data and deduplicated unique users count
     return res.status(200).json({
       refinedData,
       totalUniqueUsers,

@@ -64,7 +64,7 @@ useEffect(() => {
 
     async function getUrlAnalytics(){
         try {
-            const response = await axiosInstance.get(`user/analytics/${urlId}`)
+            const response = await axiosInstance.get(`api/analytics/${urlId}`)
             console.log("this is the response ",response)
             setdata(response.data)
             console.log(data)

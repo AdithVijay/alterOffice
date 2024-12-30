@@ -8,7 +8,7 @@ import { Link } from "react-router-dom";
 
 export default function Dashboard() {
   const user = useSelector((state) => state.user.users);
-  const [urls, setUrls] = useState([]);
+  const [urls, setUrls] = useState([])
 console.log(user);
 
   useEffect(() => {
@@ -17,21 +17,21 @@ console.log(user);
 
   const getUrlData = async () => {
     try {
-      const response = await axiosInstance.get(`/user/useranalytics/${user}`);
-      console.log("API Response:", response.data); // Log this
-      setUrls(response.data.refinedData || []); // Safely handle if refinedData is missing
+      const response = await axiosInstance.get(`/api/analytics/overall/${user}`);
+      console.log("API Response:", response.data); 
+      setUrls(response.data.refinedData || []); 
     } catch (error) {
       console.error("Error fetching URL data:", error);
-      setUrls([]); // Fallback to an empty array on error
+      setUrls([]); 
     }
   };
 
-  // Calculate total statistics
+
   const totalUrls = urls.length;
   const totalClicks = urls?.reduce((sum, url) => sum + url.clicks, 0);
   const uniqueUsers = urls?.reduce((sum, url) => sum + url.uniqueUsers, 0);
 
-  // Aggregate clicks by date
+
   const clicksByDate = urls
     .flatMap((url) => url.clicksByDate)
     .reduce((acc, { date, clickCount }) => {
@@ -45,7 +45,7 @@ console.log(user);
     }, [])
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-  // Aggregate OS type data
+
   const osType = urls
     .flatMap((url) => url.osType)
     .reduce((acc, { osName, uniqueClicks, uniqueUsers }) => {
@@ -59,7 +59,7 @@ console.log(user);
       return acc;
     }, []);
 
-  // Aggregate device type data
+
   const deviceType = urls
     .flatMap((url) => url.deviceType)
     .reduce((acc, { deviceName, uniqueClicks, uniqueUsers }) => {
@@ -113,7 +113,7 @@ console.log(user);
                     <XAxis dataKey="date" />
                     <YAxis />
                     <Tooltip />
-                    <Bar dataKey="clickCount" fill="hsl(221, 70%, 46%)" /> {/* Default blue color */}
+                    <Bar dataKey="clickCount" fill="hsl(221, 70%, 46%)" /> 
                     </BarChart>
               </ResponsiveContainer>
             </CardContent>

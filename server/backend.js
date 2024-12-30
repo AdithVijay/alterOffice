@@ -53,7 +53,7 @@ redisClient
   .catch((err) => console.error("Redis connection error:", err));
 
 // Register routes
-app.use("/user", userRoute)
+app.use("/api", userRoute)
 
 app.listen(3000, () => {
   console.log("server started");

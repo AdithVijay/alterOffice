@@ -7,6 +7,7 @@ import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import { addUser } from "@/redux/Userslice";
 import { Link, Navigate, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 // import { toast } from "sonner";
 
 const SignUp = () => {
@@ -25,14 +26,14 @@ const SignUp = () => {
     e.preventDefault();
     console.log("Submitting:", { name,email, password }); 
     try {
-      const response = await axiosInstance.post("/user/signup",{name, email, password });
+      const response = await axiosInstance.post("/api/signup",{name, email, password });
       console.log("response from server", response)
-      console.log("sasfdsfadf",response.data.user._id);
-      
+      toast.success("User SignedUp Successfully")
       navigate("/profile")
       dispatch(addUser(response.data.user._id))
     } catch (error) {
-      alert(error.response.data.message)
+      
+      toast.error(error.response.data.message)
       console.log(error)
     }
   };
@@ -113,9 +114,9 @@ const SignUp = () => {
                   var credentialResponseDecoded = jwtDecode(credentialResponse.credential);
                   const googleToken = credentialResponse.credential;
 
-                  //Post request being sending  to the server 
+                 
 
-                  axiosInstance.post("/user/googlesignin", { token: googleToken })
+                  axiosInstance.post("/api/googlesignin", { token: googleToken })
                   .then(response => {
                     console.log(response.data);
                     dispatch(addUser(response.data.user.id))
@@ -124,8 +125,6 @@ const SignUp = () => {
                   
                   .catch(error => {
                     console.log(error);
-                    // toast.error( error.response)
-                    // toast.error(error.response.data.message)
                   });
                
                 }}

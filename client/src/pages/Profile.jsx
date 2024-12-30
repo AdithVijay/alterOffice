@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Link2, Menu } from 'lucide-react';
-import { Button } from '../components/ui/button'  // Ensure you have a Button component
-import { Input } from '../components/ui/input';    // Ensure you have an Input component
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';  // Ensure your Table component exists
-import { Sheet, SheetContent, SheetTrigger } from '../components/ui/sheet';  // Ensure your Sheet component exists
+import { Button } from '../components/ui/button'  
+import { Input } from '../components/ui/input';   
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
+import { Sheet, SheetContent, SheetTrigger } from '../components/ui/sheet';
 import axiosInstance from '@/config/axiosInstance';
 import { useDispatch, useSelector } from 'react-redux';
 import Modal from './Modal';
@@ -27,7 +27,7 @@ const Profile = () => {
 
   const getUrlData = async()=>{
     try {
-      const response = await axiosInstance.get(`/user/getUrlData/${user}`)
+      const response = await axiosInstance.get(`/api/getUrlData/${user}`)
       console.log(response)
       console.log("aa",response.data)
       setUrls(response.data)
@@ -35,7 +35,6 @@ const Profile = () => {
         console.log(error)
     }
   }
-
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -47,7 +46,7 @@ const Profile = () => {
       
       console.log("payloadd ",payload)
       
-      const response = await axiosInstance.post("/user/shorten", payload);
+      const response = await axiosInstance.post("/api/shorten", payload);
       console.log(response)
       setUrl('');
       setShortUrl(''); 
@@ -59,10 +58,7 @@ const Profile = () => {
     }
   }
   
-
  async function logout(){
-  console.log("butto");
-
   dispatch(logoutUser())
   navigate("/login")
   }
@@ -119,11 +115,11 @@ const Profile = () => {
           />
           <Button type="submit">Shorten URL</Button>
           <Input
-            type="text"  // For custom alias
+            type="text"  
             placeholder="Enter custom alias (optional)"
-            value={shortUrl || ""}  // Ensure the value never shows as null or undefined
-            onChange={(e) => setShortUrl(e.target.value.trim())}  // Trim whitespace on input
-            className="flex-1 max-w-[250px]"  // Limit the width of the input field
+            value={shortUrl || ""}  
+            onChange={(e) => setShortUrl(e.target.value.trim())}  
+            className="flex-1 max-w-[250px]"  
           />
           <Button type="submit">Custom Short URL</Button>
         </form>
