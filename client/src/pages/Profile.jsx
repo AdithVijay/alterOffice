@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import Modal from './Modal';
 import { Link, useNavigate } from 'react-router-dom';
 import { logoutUser } from '@/redux/UserSlice';
+import { toast } from 'react-toastify';
 
 const Profile = () => {
   const [url, setUrl] = useState('');
@@ -51,9 +52,10 @@ const Profile = () => {
       setUrl('');
       setShortUrl(''); 
       await getUrlData();
+      toast.success("url created")
     } catch (error) {
       console.log(error);
-      alert(error.response.data.message);
+      toast.error(error.response.data.message)
     }
   }
   

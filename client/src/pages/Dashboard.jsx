@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 export default function Dashboard() {
   const user = useSelector((state) => state.user.users);
   const [urls, setUrls] = useState([]);
+console.log(user);
 
   useEffect(() => {
     getUrlData();
@@ -16,17 +17,19 @@ export default function Dashboard() {
 
   const getUrlData = async () => {
     try {
-      const response = await axiosInstance.get(`/user/getUrlData/${user}`);
-      setUrls(response.data);
+      const response = await axiosInstance.get(`/user/useranalytics/${user}`);
+      console.log("API Response:", response.data); // Log this
+      setUrls(response.data.refinedData || []); // Safely handle if refinedData is missing
     } catch (error) {
       console.error("Error fetching URL data:", error);
+      setUrls([]); // Fallback to an empty array on error
     }
   };
 
   // Calculate total statistics
   const totalUrls = urls.length;
-  const totalClicks = urls.reduce((sum, url) => sum + url.clicks, 0);
-  const uniqueUsers = urls.reduce((sum, url) => sum + url.uniqueUsers, 0);
+  const totalClicks = urls?.reduce((sum, url) => sum + url.clicks, 0);
+  const uniqueUsers = urls?.reduce((sum, url) => sum + url.uniqueUsers, 0);
 
   // Aggregate clicks by date
   const clicksByDate = urls
@@ -122,7 +125,7 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent>
                 <ul className="space-y-6">
-                  {osType.map((os, index) => (
+                  {osType?.map((os, index) => (
                     <li key={index} className="flex justify-between">
                       <span>{os.osName}</span>
                       <span>{os.uniqueClicks} clicks ({os.uniqueUsers} users)</span>
@@ -137,7 +140,7 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent>
                 <ul className="space-y-5">
-                  {deviceType.map((device, index) => (
+                  {deviceType?.map((device, index) => (
                     <li key={index} className="flex justify-between">
                       <span>{device.deviceName}</span>
                       <span>{device.uniqueClicks} clicks ({device.uniqueUsers} users)</span>

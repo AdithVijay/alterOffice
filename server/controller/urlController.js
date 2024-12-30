@@ -74,13 +74,23 @@ const getUrlData = async (req, res) => {
 
 const handleGenerateNewUrl = async (req, res) => {
   try {
-    const { url, user ,customAlias} = req.body;
-    console.log("this s the custom aliasssss", customAlias)
-    
+    const { url, user, customAlias } = req.body;
+    console.log("this is the custom alias:", customAlias);
+
     if (!url || !user) {
       return res.status(400).json({ message: "Bad Request: Missing URL or User data" });
     }
 
+    // Check if the URL already exists for the given user across both schemas
+    const urlExistsInURL = await URL.findOne({ longUrl: url, user: user });
+    const urlExistsInCustomAlias = await CustomAlias.findOne({ longUrl: url, user: user });
+
+    if (urlExistsInURL || urlExistsInCustomAlias) {
+      const existingShortUrl = urlExistsInURL ? urlExistsInURL.shortUrl : urlExistsInCustomAlias.alias;
+      return res.status(409).json({ message: "URL already exists", shortUrl: existingShortUrl });
+    }
+
+    // If a custom alias is provided, check if it already exists
     if (customAlias) {
       const aliasExists = await CustomAlias.findOne({ alias: customAlias });
       if (aliasExists) {
@@ -96,27 +106,22 @@ const handleGenerateNewUrl = async (req, res) => {
       return res.status(200).json({ message: "Custom alias created successfully", shortUrl: customAlias });
     }
 
-    const urlExists = await URL.findOne({ longUrl: url, user: user });
-
-
-    if (urlExists) {
-      return res.status(409).json({ message: "URL already exists" });
-    }
-
-    const shortId = nanoid(8) 
+    // If no custom alias is provided, generate a short ID
+    const shortId = nanoid(8);
 
     await URL.create({
       user: user,
       longUrl: url,
-      shortUrl: shortId
+      shortUrl: shortId,
     });
 
     return res.status(200).json({ message: "URL shortened successfully", shortUrl: shortId });
   } catch (error) {
-    console.log(error);
+    console.error("Error in handleGenerateNewUrl:", error);
     return res.status(500).json({ message: "Error generating new URL" });
   }
 };
+
 
 // ----------------------------------------------------------------------------------------------------------------------------------
 

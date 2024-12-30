@@ -6,6 +6,7 @@ import { Provider } from 'react-redux';
 import store from './redux/Store';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { BrowserRouter } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -13,6 +14,7 @@ createRoot(document.getElementById('root')).render(
     <GoogleOAuthProvider clientId="461750813528-fh0oohkab4fjsq691h0soud0ll0bjqe4.apps.googleusercontent.com">
     <BrowserRouter>
       <App />
+      <ToastContainer/>
       </BrowserRouter>
     </GoogleOAuthProvider>
     </Provider>

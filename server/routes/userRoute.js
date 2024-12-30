@@ -15,6 +15,8 @@ userRoute.post("/shorten",rateLimiter, urlController.handleGenerateNewUrl)
 userRoute.get("/getUrlData/:id",urlController.getUrlData)
 userRoute.get("/:shortUrl",urlController.handleRedirect)
 
+
 userRoute.get("/analytics/:id",urlAnalyticsController.fetchUrlAnalytics)
+userRoute.get("/useranalytics/:id",urlAnalyticsController.fetchUserAnalytics)
 
 module.exports = userRoute
