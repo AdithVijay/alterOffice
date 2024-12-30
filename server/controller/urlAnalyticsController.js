@@ -2,11 +2,10 @@ const URL = require("../model/url")
 
  const fetchUrlAnalytics = async(req,res) =>{
        const {id} =  req.params
-       const trimmedId = id.trim();
-       console.log(id)
+       const trimmedId = id.trim()
+
        
        const urlData = await URL.findById(trimmedId)
-        
         const refinedData = {
             longUrl: urlData.longUrl,
             shortUrl: urlData.shortUrl,
@@ -27,7 +26,6 @@ const URL = require("../model/url")
               uniqueUsers: device.uniqueUsers
             }))
           };
-          console.log("daatta",refinedData);
           
          return res.status(200).json(refinedData);
 }

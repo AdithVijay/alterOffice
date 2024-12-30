@@ -5,9 +5,10 @@ import { Input } from '../components/ui/input';    // Ensure you have an Input c
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';  // Ensure your Table component exists
 import { Sheet, SheetContent, SheetTrigger } from '../components/ui/sheet';  // Ensure your Sheet component exists
 import axiosInstance from '@/config/axiosInstance';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import Modal from './Modal';
 import { Link, useNavigate } from 'react-router-dom';
+import { logoutUser } from '@/redux/UserSlice';
 
 const Profile = () => {
   const [url, setUrl] = useState('');
@@ -17,7 +18,7 @@ const Profile = () => {
   console.log("adsaasdasd",user)
 
   const navigate = useNavigate()
-
+  const dispatch = useDispatch()
   useEffect(() => {
     getUrlData()
   }, [])
@@ -35,21 +36,33 @@ const Profile = () => {
   }
 
 
-  async function handleSubmit(e){
-    e.preventDefault()
+  async function handleSubmit(e) {
+    e.preventDefault();
     try {
-      const response =await axiosInstance.post("/user/shorten",{url,user})
+      const payload = { url, user };
+      if (shortUrl) {
+        payload.customAlias = shortUrl; 
+      }
+      
+      console.log("payloadd ",payload)
+      
+      const response = await axiosInstance.post("/user/shorten", payload);
       console.log(response)
-      setUrl('')
-      await getUrlData()
+      setUrl('');
+      setShortUrl(''); 
+      await getUrlData();
     } catch (error) {
-      console.log(error)
-      alert(error.response.data.message)
+      console.log(error);
+      alert(error.response.data.message);
     }
-  };
-  function handleCustomAlias(){
-    console.log(shortUrl);
-    
+  }
+  
+
+ async function logout(){
+  console.log("butto");
+
+  dispatch(logoutUser())
+  navigate("/login")
   }
 
   return (
@@ -85,6 +98,9 @@ const Profile = () => {
           <Link to={"/dashboard"}>
             <Button variant="ghost">Dashboard</Button>
             </Link>
+            <Button variant="ghost" onClick={logout} className="text-sm">
+                Logout
+              </Button>
           </div>
         </div>
       </nav>
@@ -100,15 +116,12 @@ const Profile = () => {
             className="flex-1"
           />
           <Button type="submit">Shorten URL</Button>
-        </form>
-        <form onSubmit={handleCustomAlias} className="flex gap-2 mb-8">
           <Input
-              type="text"  // For custom alias
-              placeholder="Enter custom alias"
-              value={shortUrl}
-              onChange={(e) => setShortUrl(e.target.value)}  // Correctly using setShortUrl
-              required
-              className="flex-1 max-w-[250px]"    // Limit the width of the input field.
+            type="text"  // For custom alias
+            placeholder="Enter custom alias (optional)"
+            value={shortUrl || ""}  // Ensure the value never shows as null or undefined
+            onChange={(e) => setShortUrl(e.target.value.trim())}  // Trim whitespace on input
+            className="flex-1 max-w-[250px]"  // Limit the width of the input field
           />
           <Button type="submit">Custom Short URL</Button>
         </form>
@@ -125,25 +138,26 @@ const Profile = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {urls.map((url) => (
-                <TableRow key={url._id}>
-                 <TableCell className="font-medium truncate max-w-[200px]">
-                    <a href={url.longUrl} target="_blank" rel="noopener noreferrer">
-                      {url.longUrl}
-                    </a>
-                  </TableCell>
-                  <TableCell>
-                          <a href={`http://localhost:3000/user/${url.shortUrl}`} target="_blank" rel="noopener noreferrer">
-                            {`http://localhost:3000/user/${url.shortUrl}`}
-                          </a>
-                  </TableCell>
-                  <TableCell className=" ">
-                    <Modal urlId = {url._id}/>
-                  </TableCell>
-                  <TableCell className="text-right">{url.clicks}</TableCell>
-                  <TableCell className="text-right">{new Date(url.createdAt).toLocaleString()}</TableCell>
-                </TableRow>
-              ))}
+            {urls.map((url) => (
+            <TableRow key={url._id}>
+              <TableCell className="font-medium truncate max-w-[200px]">
+                <a href={url.longUrl} target="_blank" rel="noopener noreferrer">
+                  {url.longUrl}
+                </a>
+              </TableCell>
+              <TableCell>
+                <a href={`http://localhost:3000/user/${url.shortUrl}`} target="_blank" rel="noopener noreferrer">
+                  {`http://localhost:3000/user/${url.shortUrl}`}
+                </a>
+                {url.type === "custom" && <span className="text-xs text-gray-500"> (Custom)</span>}
+              </TableCell>
+              <TableCell>
+                <Modal urlId={url._id} />
+              </TableCell>
+              <TableCell className="text-right">{url.clicks}</TableCell>
+              <TableCell className="text-right">{new Date(url.createdAt).toLocaleString()}</TableCell>
+            </TableRow>
+          ))}
             </TableBody>
           </Table>
         </div>

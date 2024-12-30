@@ -47,9 +47,14 @@ const analyticsData = {
 
 export default function Analytics({isOpen, onClose ,urlId}) {
   const [activeTab, setActiveTab] = useState("overview")
-  const [data, setdata] = useState();
+  const [data, setdata] = useState({
+  osType: [],
+  deviceType: [],
+  clicksByDate: [],
+});
+
   
-console.log("url id",urlId);
+console.log("url id",urlId)
 
   
 useEffect(() => {
@@ -60,8 +65,10 @@ useEffect(() => {
     async function getUrlAnalytics(){
         try {
             const response = await axiosInstance.get(`user/analytics/${urlId}`)
-            console.log(response)
+            console.log("this is the response ",response)
             setdata(response.data)
+            console.log(data)
+            
         } catch (error) {
             console.log(error)
         }
@@ -170,16 +177,16 @@ console.log("analytics data",data)
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {data?.osType.map((os) => (
-                          <TableRow key={os.osName}>
-                            <TableCell className="font-medium">{os.osName}</TableCell>
-                            <TableCell className="text-right">{os.uniqueClicks}</TableCell>
-                            <TableCell className="text-right">{os.uniqueUsers}</TableCell>
-                            <TableCell className="text-right">
-                              {((os.uniqueClicks / data.clicks) * 100).toFixed(1)}%
-                            </TableCell>
-                          </TableRow>
-                        ))}
+                      {data?.osType?.map((os) => (
+                        <TableRow key={os.osName}>
+                          <TableCell className="font-medium">{os.osName}</TableCell>
+                          <TableCell className="text-right">{os.uniqueClicks}</TableCell>
+                          <TableCell className="text-right">{os.uniqueUsers}</TableCell>
+                          <TableCell className="text-right">
+                            {((os.uniqueClicks / data.clicks) * 100).toFixed(1)}%
+                          </TableCell>
+                        </TableRow>
+                      ))}
                       </TableBody>
                     </Table>
                   </CardContent>

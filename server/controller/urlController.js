@@ -1,7 +1,8 @@
 const User = require("../model/user");
 const URL = require("../model/url");
 const { nanoid } = require('nanoid');
-const UAParser = require('ua-parser-js');  // Import the correct parser
+const UAParser = require('ua-parser-js');  
+const CustomAlias = require('../model/customAlias');
 
 // Function to extract the OS name using ua-parser-js
 function extractOS(userAgent) {
@@ -25,27 +26,77 @@ function extractDevice(userAgent) {
   }
 }
 
-const getUrlData = async(req, res) => {
+// ----------------------------------------------------------------------------------------------------------------------------------
+
+const getUrlData = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params; // User ID
     const user = await User.findById(id);
 
-    const url = await URL.find({ user: user._id });
-    return res.status(200).json(url);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Fetch normal URLs
+    const urls = await URL.find({ user: user._id });
+
+    // Fetch custom aliases for the user
+    const customAliases = await CustomAlias.find({ user: user._id });
+
+    // Combine normal URLs and custom aliases
+    const combinedUrls = [
+      ...urls.map(url => ({
+        _id: url._id,
+        longUrl: url.longUrl,
+        shortUrl: url.shortUrl,
+        clicks: url.clicks || 0,
+        createdAt: url.createdAt,
+        type: "normal", // Mark it as a normal URL
+      })),
+      ...customAliases.map(alias => ({
+        _id: alias._id,
+        longUrl: alias.longUrl,
+        shortUrl: alias.alias,
+        clicks: alias.clicks, // CustomAlias clicks would need separate tracking if implemented
+        createdAt: alias.createdAt,
+        type: "custom", // Mark it as a custom alias
+      })),
+    ];
+
+    return res.status(200).json(combinedUrls);
   } catch (error) {
-    console.log(error);
+    console.log("Error fetching URL data:", error);
     return res.status(500).json({ message: "Error fetching URL data" });
   }
 };
 
+// ----------------------------------------------------------------------------------------------------------------------------------
+
 const handleGenerateNewUrl = async (req, res) => {
   try {
-    const { url, user } = req.body;
+    const { url, user ,customAlias} = req.body;
+    console.log("this s the custom aliasssss", customAlias)
+    
     if (!url || !user) {
       return res.status(400).json({ message: "Bad Request: Missing URL or User data" });
     }
 
-    const urlExists = await URL.findOne({ longUrl: url });
+    if (customAlias) {
+      const aliasExists = await CustomAlias.findOne({ alias: customAlias });
+      if (aliasExists) {
+        return res.status(409).json({ message: "Custom alias already exists. Please choose another one." });
+      }
+
+      // Save the custom alias
+      await CustomAlias.create({
+        alias: customAlias,
+        longUrl: url,
+        user,
+      });
+      return res.status(200).json({ message: "Custom alias created successfully", shortUrl: customAlias });
+    }
+
+    const urlExists = await URL.findOne({ longUrl: url, user: user });
 
 
     if (urlExists) {
@@ -67,14 +118,17 @@ const handleGenerateNewUrl = async (req, res) => {
   }
 };
 
-
+// ----------------------------------------------------------------------------------------------------------------------------------
 
 const handleRedirect = async (req, res) => {
   try {
     const { shortUrl } = req.params;
 
-    const url = await URL.findOne({ shortUrl });
-    if (!url) {
+    // Check if the short URL corresponds to a custom alias
+    const alias = await CustomAlias.findOne({ alias: shortUrl });
+    const target = alias || (await URL.findOne({ shortUrl }));
+
+    if (!target) {
       return res.status(404).json({ message: "Short URL not found" });
     }
 
@@ -86,39 +140,38 @@ const handleRedirect = async (req, res) => {
     const userIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
     // Update total clicks
-    url.clicks += 1;
+    target.clicks += 1;
 
     // Check if the user has clicked this URL today
-    const uniqueUserEntry = url.uniqueUserClicks?.find(
+    const uniqueUserEntry = target.uniqueUserClicks?.find(
       entry => entry.ip === userIP && new Date(entry.date).getTime() === currentDate.getTime()
     );
 
     if (!uniqueUserEntry) {
       // Increment unique users only if this is their first click today
-      url.uniqueUsers += 1;
-      url.uniqueUserClicks.push({ date: currentDate, ip: userIP });
+      target.uniqueUsers += 1;
+      target.uniqueUserClicks.push({ date: currentDate, ip: userIP });
     }
 
     // Update clicksByDate
-    const clickByDate = url.clicksByDate.find(
+    const clickByDate = target.clicksByDate.find(
       entry => new Date(entry.date).getTime() === currentDate.getTime()
     );
 
     if (clickByDate) {
       clickByDate.clickCount += 1;
     } else {
-      url.clicksByDate.push({ date: currentDate, clickCount: 1 });
+      target.clicksByDate.push({ date: currentDate, clickCount: 1 });
     }
 
     // Update OS and Device Analytics
     const userAgent = req.headers['user-agent'];
-    const osName = extractOS(userAgent);
-    const deviceName = extractDevice(userAgent);
+    const osName = extractOS(userAgent); // Helper function to extract OS name
+    const deviceName = extractDevice(userAgent); // Helper function to extract device type
 
     // Update OS type analytics
-    const osTypeEntry = url.osType.find(entry => entry.osName === osName);
+    const osTypeEntry = target.osType.find(entry => entry.osName === osName);
     if (osTypeEntry) {
-      // Check if the user is unique for this OS today
       const osUserEntry = osTypeEntry.uniqueUserIPs?.find(
         entry => entry.ip === userIP && new Date(entry.date).getTime() === currentDate.getTime()
       );
@@ -129,7 +182,7 @@ const handleRedirect = async (req, res) => {
         osTypeEntry.uniqueUserIPs.push({ ip: userIP, date: currentDate });
       }
     } else {
-      url.osType.push({
+      target.osType.push({
         osName,
         uniqueClicks: 1,
         uniqueUsers: 1,
@@ -138,9 +191,8 @@ const handleRedirect = async (req, res) => {
     }
 
     // Update Device type analytics
-    const deviceTypeEntry = url.deviceType.find(entry => entry.deviceName === deviceName);
+    const deviceTypeEntry = target.deviceType.find(entry => entry.deviceName === deviceName);
     if (deviceTypeEntry) {
-      // Check if the user is unique for this device today
       const deviceUserEntry = deviceTypeEntry.uniqueUserIPs?.find(
         entry => entry.ip === userIP && new Date(entry.date).getTime() === currentDate.getTime()
       );
@@ -148,9 +200,10 @@ const handleRedirect = async (req, res) => {
       if (!deviceUserEntry) {
         deviceTypeEntry.uniqueClicks += 1;
         deviceTypeEntry.uniqueUsers += 1;
+        deviceTypeEntry.uniqueUserIPs.push({ ip: userIP, date: currentDate });
       }
     } else {
-      url.deviceType.push({
+      target.deviceType.push({
         deviceName,
         uniqueClicks: 1,
         uniqueUsers: 1,
@@ -158,14 +211,17 @@ const handleRedirect = async (req, res) => {
       });
     }
 
-    await url.save();
+    // Save updates to the appropriate model (CustomAlias or URL)
+    await target.save();
 
-    res.redirect(url.longUrl);
+    // Redirect to the long URL
+    res.redirect(target.longUrl);
   } catch (error) {
     console.error("Error handling redirect:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
+
 
 
 
