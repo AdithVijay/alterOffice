@@ -144,8 +144,8 @@ const Profile = () => {
                 </a>
               </TableCell>
               <TableCell>
-                <a href={`http://localhost:3000/user/${url.shortUrl}`} target="_blank" rel="noopener noreferrer">
-                  {`http://localhost:3000/user/${url.shortUrl}`}
+                <a href={`http://ec2-13-202-114-120.ap-south-1.compute.amazonaws.com:3000/api/${url.shortUrl}`} target="_blank" rel="noopener noreferrer">
+                  {`http://ec2-13-202-114-120.ap-south-1.compute.amazonaws.com:3000/api/${url.shortUrl}`}
                 </a>
                 {url.type === "custom" && <span className="text-xs text-gray-500"> (Custom)</span>}
               </TableCell>
