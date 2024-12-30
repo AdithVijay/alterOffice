@@ -4,7 +4,7 @@ import Login from './pages/Login'
 import SignUp from './pages/SignUp'
 import { BrowserRouter,Router,Routes,Route } from 'react-router-dom'
 import Profile from './pages/Profile'
-import Modal from './pages/modal'
+
 import Dashboard from './pages/Dashboard'
 import PrivateRoute from './protectedRoutes/PrivateRoute'
 
@@ -28,7 +28,6 @@ const App = () => {
           <Profile/>
           // </PrivateRoute>
           }/>
-        <Route path='/modal' element={<Modal/> }/>
         <Route path='/dashboard' element={
           // <PrivateRoute>
           <Dashboard/>
