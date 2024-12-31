@@ -55,7 +55,7 @@ Ensure you have the following installed on your system:
 ## API Documentation
 
 The API documentation is available at the following link:
-[API Documentation](https://www.ramankutty.shop/api)
+[API Documentation](https://www.ramankutty.shop/api-docs)
 
 ## Notes
 
